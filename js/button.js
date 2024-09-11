@@ -25,6 +25,12 @@
     loadingText: 'loading...'
   }
 
+  function escapeHtml(unsafe) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(unsafe, 'text/html');
+    return doc.body.textContent || "";
+  }
+
   Button.prototype.setState = function (state) {
     var d    = 'disabled'
     var $el  = this.$element
@@ -37,7 +43,10 @@
 
     // push to event loop to allow forms to submit
     setTimeout($.proxy(function () {
-      $el[val](data[state] == null ? this.options[state] : data[state])
+
+      var content = data[state] == null ? this.options[state] : data[state]
+      // Escape the content before setting it
+      $el[val](escapeHtml(content))
 
       if (state == 'loadingText') {
         this.isLoading = true
