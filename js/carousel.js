@@ -207,6 +207,10 @@
   // CAROUSEL DATA-API
   // =================
 
+  // CVE-2024-6484
+  // NOTE: in BS 5+ the only valid selectdors should be classes or IDs, the regexp could be simpler
+  var SAFE_URL_PATTERN = /^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:/?#]*(?:[/?#]|$))/i
+
   var clickHandler = function (e) {
     var $this   = $(this)
     var href    = $this.attr('href')
@@ -214,10 +218,14 @@
       href = href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
     }
 
+    e.preventDefault() // CVE-2024-6484
     var target  = $this.attr('data-target') || href
+    if (!target || !SAFE_URL_PATTERN.test(target)) {
+      target = null
+    }
     var $target = $(document).find(target)
 
-    if (!$target.hasClass('carousel')) return
+    if ($target.hasClass('carousel')) {
 
     var options = $.extend({}, $target.data(), $this.data())
     var slideIndex = $this.attr('data-slide-to')
@@ -228,7 +236,7 @@
     if (slideIndex) {
       $target.data('bs.carousel').to(slideIndex)
     }
-
+  }
     e.preventDefault()
   }
 
